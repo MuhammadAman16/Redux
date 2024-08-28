@@ -14,4 +14,5 @@ ConfigureStore.dispatch(bugResolved({ id: 1 }));
 // console.log(bugAdded());
 
 const unresolvedBugs = unresolvedBugSelector(ConfigureStore.getState());
+
 console.log(unresolvedBugs);

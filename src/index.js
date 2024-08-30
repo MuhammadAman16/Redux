@@ -18,6 +18,7 @@ store.dispatch(userAdded({ name: "Muhammad Aman" }));
 store.dispatch((dispatch, getState) => {
   dispatch({ type: "BugReceived", bugs: [1, 2, 3] });
 });
+store.dispatch({ type: "x", payload: { message: "An error occured" } });
 
 // ConfigureStore.dispatch(projectAdded({ name: "test1" }));
 // ConfigureStore.dispatch(bugAdded({ description: "Bug1" }));

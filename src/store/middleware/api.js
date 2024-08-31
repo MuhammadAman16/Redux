@@ -8,8 +8,9 @@ const api =
     if (action.type !== fetchAPI.type) {
       return next(action);
     } else {
+      const { url, onSuccess, onStart, onError, method, data } = action.payload;
+      dispatch({ type: onStart });
       next(action);
-      const { url, onSuccess, onError, method, data } = action.payload;
       try {
         const result = await axios.request({
           baseURL: "http://localhost:9001/api",
@@ -17,16 +18,14 @@ const api =
           method,
           data,
         });
+
+        dispatch(fetchSuccess(result.data));
         if (onSuccess) {
           dispatch({ type: onSuccess, payload: result.data });
-          return;
         }
-        dispatch(fetchSuccess(result.data));
       } catch (error) {
-        dispatch(fetchFail(error));
-        if (onError) dispatch({ type: onError, payload: error });
-        else {
-        }
+        dispatch(fetchFail(error.message));
+        if (onError) dispatch({ type: onError, payload: error.message });
       }
     }
   };

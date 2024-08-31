@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createSelector } from "@reduxjs/toolkit";
+import { fetchAPI } from "./api";
 
 let lastId = 0;
 
@@ -11,6 +12,17 @@ const bugSlice = createSlice({
     lastfetch: null,
   },
   reducers: {
+    // /bugs/bugReceived
+    bugsReceived: (state, action) => {
+      state.list = action.payload;
+      state.loading = false;
+    },
+    bugsRequested: (state, action) => {
+      state.loading = true;
+    },
+    bugRequestFailed: (state, action) => {
+      state.loading = false;
+    },
     //ACTIONS => ACTION HANDLERS
     bugAdded: (state, action) => {
       state.list.push({
@@ -36,13 +48,28 @@ const bugSlice = createSlice({
   },
 });
 
-export const { bugAdded, bugRemoved, bugResolved, bugAssignedtoUser } =
-  bugSlice.actions;
+export const {
+  bugAdded,
+  bugRemoved,
+  bugResolved,
+  bugAssignedtoUser,
+  bugsReceived,
+  bugsRequested,
+  bugRequestFailed,
+} = bugSlice.actions;
 export default bugSlice.reducer;
 
-// export const unresolvedBugSelector = (state) =>
-//   state.entities.bugs.filter((bug) => !bug.resolved);
+const url = "/bugs";
+//ACTION CREATERS
+export const loadBugs = () =>
+  fetchAPI({
+    url,
+    onStart: bugsRequested.type,
+    onError: bugRequestFailed.type,
+    onSuccess: bugsReceived.type,
+  });
 
+// GETTERS
 export const unresolvedBugSelector = createSelector(
   (state) => state.entities.bugs,
   (bugs) => bugs.filter((bug) => !bug.resolved)

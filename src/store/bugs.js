@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createSelector } from "@reduxjs/toolkit";
 import { fetchAPI } from "./api";
+import moment from "moment";
 
 let lastId = 0;
 
@@ -9,13 +10,14 @@ const bugSlice = createSlice({
   initialState: {
     list: [],
     loading: false,
-    lastfetch: null,
+    lastFetch: null,
   },
   reducers: {
     // /bugs/bugReceived
     bugsReceived: (state, action) => {
       state.list = action.payload;
       state.loading = false;
+      state.lastFetch = Date.now();
     },
     bugsRequested: (state, action) => {
       state.loading = true;
@@ -61,13 +63,20 @@ export default bugSlice.reducer;
 
 const url = "/bugs";
 //ACTION CREATERS
-export const loadBugs = () =>
-  fetchAPI({
-    url,
-    onStart: bugsRequested.type,
-    onError: bugRequestFailed.type,
-    onSuccess: bugsReceived.type,
-  });
+export const loadBugs = () => (dispatch, getState) => {
+  const { lastFetch } = getState().entities.bugs;
+  const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
+  if (diffInMinutes < 5) return;
+
+  dispatch(
+    fetchAPI({
+      url,
+      onStart: bugsRequested.type,
+      onError: bugRequestFailed.type,
+      onSuccess: bugsReceived.type,
+    })
+  );
+};
 
 // GETTERS
 export const unresolvedBugSelector = createSelector(

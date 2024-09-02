@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { createSelector } from "@reduxjs/toolkit";
 import { fetchAPI } from "./api";
 import moment from "moment";
+import { method } from "lodash";
 
 const bugSlice = createSlice({
   name: "bugs",
@@ -39,14 +40,14 @@ const bugSlice = createSlice({
       }
     },
     bugAssignedtoUser: (bugs, action) => {
-      const { userId, bugId } = action.payload;
+      const { userId, id: bugId } = action.payload;
       const index = bugs.list.findIndex((bug) => bug.id === bugId);
       bugs.list[index].userId = userId;
     },
   },
 });
 
-export const {
+const {
   bugAdded,
   bugRemoved,
   bugResolved,
@@ -74,6 +75,22 @@ export const loadBugs = () => (dispatch, getState) => {
     })
   );
 };
+
+export const assignBug = (userId, bugId) =>
+  fetchAPI({
+    url: `/bugs/${bugId}`,
+    method: "patch",
+    data: { userId: userId },
+    onSuccess: bugAssignedtoUser.type,
+  });
+
+export const resolveBug = (bugId) =>
+  fetchAPI({
+    url: `/bugs/${bugId}`,
+    method: "patch",
+    data: { resolved: "true" },
+    onSuccess: bugResolved.type,
+  });
 
 export const addBug = (bug) =>
   fetchAPI({

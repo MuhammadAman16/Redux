@@ -3,8 +3,6 @@ import { createSelector } from "@reduxjs/toolkit";
 import { fetchAPI } from "./api";
 import moment from "moment";
 
-let lastId = 0;
-
 const bugSlice = createSlice({
   name: "bugs",
   initialState: {
@@ -28,9 +26,7 @@ const bugSlice = createSlice({
     //ACTIONS => ACTION HANDLERS
     bugAdded: (state, action) => {
       state.list.push({
-        id: ++lastId,
         description: action.payload.description,
-        resolved: false,
       });
     },
     bugRemoved: (state, action) => {
@@ -62,6 +58,7 @@ export const {
 export default bugSlice.reducer;
 
 const url = "/bugs";
+
 //ACTION CREATERS
 export const loadBugs = () => (dispatch, getState) => {
   const { lastFetch } = getState().entities.bugs;
@@ -77,6 +74,14 @@ export const loadBugs = () => (dispatch, getState) => {
     })
   );
 };
+
+export const addBug = (bug) =>
+  fetchAPI({
+    url,
+    method: "post",
+    data: bug, // req.body
+    onSuccess: bugAdded.type,
+  });
 
 // GETTERS
 export const unresolvedBugSelector = createSelector(
